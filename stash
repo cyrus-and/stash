@@ -1,0 +1,136 @@
+#!/usr/bin/env bash
+
+STASH_DIRECTORY=${STASH_DIRECTORY:-~}
+BASE_DIRECTORY="$STASH_DIRECTORY/.stash"
+DEFAULT_TAG='default'
+
+print_help() {
+    cat <<EOF
+Synopsis:
+
+    stash -h|--help
+    stash -l|--list
+    stash -d|--drop [<tag>...]
+    stash -c|--clear
+    stash [-a|--append] [<tag>]
+
+Description:
+
+    -h, --help            : show this help
+    -l, --list            : list all the available stashes
+    -d, --drop [<tag>...] : drop stashes by tag
+    -c, --clear           : drop all the stashes
+    -a, --append [<tag>]  : append data to the specified stash
+
+    Without options (or with '--append') the behaviour is the following:
+
+     - without piped input dump the content of the specified stash;
+     - with piped input and no piped output update the specified stash;
+     - with piped input and piped output update the specified stash and copy
+       standard input to standard output.
+
+    When <tag> is missing '$DEFAULT_TAG' is used.
+EOF
+}
+
+list_stashes() {
+    ls -1 "$BASE_DIRECTORY" 2> /dev/null || die 'Cannot list your stashes'
+}
+
+clear_stashes() {
+    rm -rf "$BASE_DIRECTORY" 2> /dev/null || die 'Cannot clear your stashes'
+}
+
+drop_stash() {
+    local TAG="${1:-$DEFAULT_TAG}"
+    local FILE="$BASE_DIRECTORY/$TAG"
+    check_tag "$TAG"
+    rm "$FILE" 2> /dev/null || die "Cannot drop stash '$TAG'"
+}
+
+drop_stashes() {
+    if [ $# -eq 0 ] ; then
+        drop_stash
+    else
+        for i in $@ ; do
+            drop_stash "$i"
+        done
+    fi
+}
+
+perform_redirections() {
+    local TAG="${2:-$DEFAULT_TAG}"
+    local FILE="$BASE_DIRECTORY/$TAG"
+    check_tag "$TAG"
+    if [ -t 0 ] ; then # not piped input
+        # fetch stash
+        if [ -r "$FILE" ] ; then
+            cat "$FILE"
+        else
+            die "Cannot read stash '$TAG' (see 'stash -h' for help)"
+        fi
+        return
+    else # piped input
+        if [ -t 1 ] ; then # not piped output
+            # silently update stash
+            if "$1" ; then
+                cat >> "$FILE" # append
+            else
+                cat > "$FILE" # replace
+            fi
+        else # piped output
+            # update stash and pass through
+            if "$1" ; then
+                tee -a "$FILE" # append
+            else
+                tee "$FILE" # replace
+            fi
+        fi
+    fi
+}
+
+check_tag() {
+    [[ "$1" =~ ^[a-zA-Z0-9_][a-zA-Z0-9_-]*$ ]] || die "Invalid tag '$1'"
+}
+
+check_extra_arguments() {
+    [ $1 -gt $2 ] && die 'Unexpected parameter'
+}
+
+die() {
+    echo "$1" >&2
+    exit 1
+}
+
+mkdir -p "$BASE_DIRECTORY"
+
+case "$1" in
+    '-h'|'--help')
+        check_extra_arguments $# 1
+        print_help
+        ;;
+    '-l'|'--list')
+        check_extra_arguments $# 1
+        list_stashes
+        ;;
+    '-d'|'--drop')
+        shift
+        drop_stashes $@
+        ;;
+    '-c'|'--clear')
+        check_extra_arguments $# 1
+        clear_stashes
+        ;;
+    '-a'|'--append') # redirect with append
+        check_extra_arguments $# 2
+        [ -t 0 ] && die 'Cannot append without input'
+        perform_redirections true "$2"
+        ;;
+    -*)
+        die "Invalid option '$1'"
+        ;;
+    *) # redirect without append
+        check_extra_arguments $# 1
+        perform_redirections false "$1"
+        ;;
+esac
