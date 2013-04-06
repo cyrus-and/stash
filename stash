@@ -75,6 +75,7 @@ perform_redirections() {
         fi
     else # piped input
         if [ ! -e "$FILE" -o -f "$FILE" -a -w "$FILE" ] ; then
+            # update stash
             if [ -t 1 ] ; then # not piped output
                 # silently update stash
                 if "$1" ; then
