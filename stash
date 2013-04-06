@@ -34,7 +34,11 @@ EOF
 }
 
 list_stashes() {
-    ls -1 "$BASE_DIRECTORY" 2> /dev/null || die 'Cannot list your stashes'
+    [ -e "$BASE_DIRECTORY" \
+      -a \( ! -r "$BASE_DIRECTORY" \
+      -o ! -x "$BASE_DIRECTORY" \) ] && die 'Cannot list your stashes'
+    ls -1 "$BASE_DIRECTORY" 2> /dev/null
+    true
 }
 
 clear_stashes() {
@@ -64,26 +68,30 @@ perform_redirections() {
     check_tag "$TAG"
     if [ -t 0 ] ; then # not piped input
         # fetch stash
-        if [ -r "$FILE" ] ; then
+        if [ -f "$FILE" -a -r "$FILE" ] ; then
             cat "$FILE"
         else
             die "Cannot read stash '$TAG' (see 'stash -h' for help)"
         fi
     else # piped input
-        if [ -t 1 ] ; then # not piped output
-            # silently update stash
-            if "$1" ; then
-                cat >> "$FILE" # append
-            else
-                cat > "$FILE" # replace
+        if [ ! -e "$FILE" -o -f "$FILE" -a -w "$FILE" ] ; then
+            if [ -t 1 ] ; then # not piped output
+                # silently update stash
+                if "$1" ; then
+                    cat >> "$FILE" # append
+                else
+                    cat > "$FILE" # replace
+                fi
+            else # piped output
+                # update stash and pass through
+                if "$1" ; then
+                    tee -a "$FILE" # append
+                else
+                    tee "$FILE" # replace
+                fi
             fi
-        else # piped output
-            # update stash and pass through
-            if "$1" ; then
-                tee -a "$FILE" # append
-            else
-                tee "$FILE" # replace
-            fi
+        else
+            die "Cannot write stash '$TAG' (see 'stash -h' for help)"
         fi
     fi
 }
