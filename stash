@@ -69,7 +69,6 @@ perform_redirections() {
         else
             die "Cannot read stash '$TAG' (see 'stash -h' for help)"
         fi
-        return
     else # piped input
         if [ -t 1 ] ; then # not piped output
             # silently update stash
