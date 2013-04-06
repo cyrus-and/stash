@@ -74,6 +74,7 @@ perform_redirections() {
             die "Cannot read stash '$TAG' (see 'stash -h' for help)"
         fi
     else # piped input
+        mkdir -p "$BASE_DIRECTORY"
         if [ ! -e "$FILE" -o -f "$FILE" -a -w "$FILE" ] ; then
             # update stash
             if [ -t 1 ] ; then # not piped output
@@ -109,8 +110,6 @@ die() {
     echo "$1" >&2
     exit 1
 }
-
-mkdir -p "$BASE_DIRECTORY"
 
 case "$1" in
     '-h'|'--help')
