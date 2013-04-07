@@ -71,7 +71,7 @@ perform_redirections() {
         if [ -f "$FILE" -a -r "$FILE" ] ; then
             cat "$FILE"
         else
-            die "Cannot read stash '$TAG' (see 'stash -h' for help)"
+            die "Cannot read stash '$TAG'"
         fi
     else # piped input
         mkdir -p "$BASE_DIRECTORY"
@@ -93,7 +93,7 @@ perform_redirections() {
                 fi
             fi
         else
-            die "Cannot write stash '$TAG' (see 'stash -h' for help)"
+            die "Cannot write stash '$TAG'"
         fi
     fi
 }
