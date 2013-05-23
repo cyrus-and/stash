@@ -8,9 +8,9 @@ name (i.e. a regular file), this script just makes file management painless.
 Install
 -------
 
-Just copy `stash` in one of the directories listed in `$PATH`, for example:
+Just put `stash` in one of the directories listed in `$PATH`, for example:
 
-    cp stash /usr/local/bin/stash
+    sudo wget https://raw.github.com/cyrus-and/stash/master/stash -qO /usr/local/bin/stash && sudo chmod +x $_
 
 Sample usage
 ------------
