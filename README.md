@@ -12,23 +12,6 @@ Just copy `stash` in one of the directories listed in `$PATH`, for example:
 
     cp stash /usr/local/bin/stash
 
-Stashes name
-------------
-
-A stash name must contain only alphanumeric characters, dashes (but not in the
-first position) and underscores, when omitted it defaults to `default`.
-
-Stashes location
-----------------
-
-If the environment variable `STASH_DIRECTORY` is not empty then stashes are
-created underneath, otherwise in `~/.stash/`.
-
-This can be used, for example, to share stashes across multiple machines with
-Dropbox, just add to `~/.bashrc`:
-
-    export STASH_DIRECTORY=~/Dropbox
-
 Sample usage
 ------------
 
@@ -63,3 +46,20 @@ Drop a list of stashes by name (including the default one):
 Cleanup everything by removing every stash:
 
     stash -c
+
+Stashes name
+------------
+
+A stash name must contain only alphanumeric characters, dashes (but not in the
+first position) and underscores, when omitted it defaults to `default`.
+
+Stashes location
+----------------
+
+If the environment variable `STASH_DIRECTORY` is not empty then stashes are
+created underneath, otherwise in `~/.stash/`.
+
+This can be used, for example, to share stashes across multiple machines with
+Dropbox, just add to `~/.bashrc`:
+
+    export STASH_DIRECTORY=~/Dropbox
