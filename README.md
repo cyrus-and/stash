@@ -60,6 +60,6 @@ If the environment variable `STASH_DIRECTORY` is not empty then stashes are
 created underneath, otherwise in `~/.stash/`.
 
 This can be used, for example, to share stashes across multiple machines with
-Dropbox, just add to `~/.bashrc`:
+[Dropbox](https://www.dropbox.com/), configure with:
 
-    export STASH_DIRECTORY=~/Dropbox
+    echo 'export STASH_DIRECTORY=~/Dropbox' >> ~/.bashrc
